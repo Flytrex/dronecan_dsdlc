@@ -56,6 +56,7 @@ parser.add_argument('--output', '-O', action='store')
 parser.add_argument('--build', action='append')
 parser.add_argument('--run-tests', action='store_true')
 parser.add_argument('namespace_dir', nargs='+')
+parser.add_argument('--append-to-previous', action=argparse.BooleanOptionalAction)
 args = parser.parse_args()
 
 buildlist = None
@@ -194,8 +195,10 @@ if __name__ == '__main__':
 
     assert not buildlist-builtlist, "%s not built" % (buildlist-builtlist,)
 
-    with open(os.path.join(build_dir+'/include/', 'dronecan_msgs.h'), 'w') as f:
-        f.write('#pragma once\n')
+    open_mode = 'a' if args.append_to_previous else 'w'
+    with open(os.path.join(build_dir+'/include/', 'dronecan_msgs.h'), open_mode) as f:
+        if not args.append_to_previous:
+            f.write('#pragma once\n')
         for msg_name in sorted(builtlist):
             include_line = '#include "%s.h"' % (msg_name,)
             f.write(include_line + '\n')
